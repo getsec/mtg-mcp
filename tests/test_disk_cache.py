@@ -23,3 +23,11 @@ def test_corrupt_file_returns_none(tmp_path):
     # Corrupt the underlying file
     next(tmp_path.glob("*.json")).write_text("{ not json")
     assert cache.get("k", ttl=100, now=1000.0) is None
+
+
+def test_structurally_invalid_entry_returns_none(tmp_path):
+    cache = DiskCache(tmp_path)
+    cache.set("k", {"a": 1}, now=1000.0)
+    # Overwrite with valid JSON that lacks the expected keys
+    next(tmp_path.glob("*.json")).write_text('{"unexpected": true}')
+    assert cache.get("k", ttl=100, now=1000.0) is None

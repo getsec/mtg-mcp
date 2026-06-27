@@ -29,11 +29,11 @@ class DiskCache:
             return None
         try:
             entry = json.loads(path.read_text())
-        except (ValueError, OSError):
+            if now - entry["ts"] > ttl:
+                return None
+            return entry["data"]
+        except (ValueError, OSError, KeyError, TypeError):
             return None
-        if now - entry["ts"] > ttl:
-            return None
-        return entry["data"]
 
     def set(self, key: str, data: dict, *, now: float | None = None) -> None:
         now = time.time() if now is None else now

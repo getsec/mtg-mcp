@@ -63,6 +63,11 @@ def test_slugify_strips_punctuation():
     assert slugify("Jenara, Asura of War") == "jenara-asura-of-war"
 
 
+def test_slugify_strips_curly_apostrophe():
+    # U+2019 right single quotation mark
+    assert slugify("Tibalt’s Trickery") == "tibalts-trickery"
+
+
 def test_slugify_uses_front_face_of_dfc():
     assert slugify("Valki, God of Lies // Tibalt, Cosmic Impostor") == "valki-god-of-lies"
 

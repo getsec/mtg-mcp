@@ -14,7 +14,7 @@ PAGE_TTL = 24 * 3600
 def slugify(name: str) -> str:
     front = name.split("//")[0]
     lowered = front.lower()
-    no_punct = re.sub(r"[','.]", "", lowered)
+    no_punct = re.sub(r"['’.,]", "", lowered)
     hyphenated = re.sub(r"[^a-z0-9]+", "-", no_punct)
     return hyphenated.strip("-")
 

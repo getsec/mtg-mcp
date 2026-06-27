@@ -80,6 +80,14 @@ def test_recommendations_tool_unknown_commander():
     assert "error" in out
 
 
+def test_recommendations_tool_edhrec_not_found():
+    def raise_cnf(commander, theme=None, budget=None):
+        raise CommanderNotFoundError("no edhrec page")
+    server.edhrec.get_recommendations = raise_cnf
+    out = server.get_commander_recommendations("Atraxa")
+    assert "error" in out and "no edhrec page" in out["error"]
+
+
 def test_themes_tool():
     out = server.list_commander_themes("Atraxa")
     assert out["themes"][0]["name"] == "Infect"

@@ -27,6 +27,12 @@ uv sync
 
 This creates `.venv/` and installs the project from the locked dependencies.
 
+Without uv, you can use a standard virtualenv instead:
+
+```bash
+python3 -m venv .venv && .venv/bin/pip install -e .
+```
+
 ## Run
 
 ```bash
