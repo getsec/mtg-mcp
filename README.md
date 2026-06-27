@@ -19,21 +19,24 @@ deckbuilding suggestions from [EDHREC](https://edhrec.com).
 
 ## Install
 
+Uses [uv](https://docs.astral.sh/uv/) for environment and dependency management.
+
 ```bash
-python3 -m venv .venv
-.venv/bin/pip install -e .
+uv sync
 ```
+
+This creates `.venv/` and installs the project from the locked dependencies.
 
 ## Run
 
 ```bash
-.venv/bin/edhrec-mcp
+uv run edhrec-mcp
 ```
 
 ## Register with Claude Code
 
 ```bash
-claude mcp add edhrec -- /absolute/path/to/.venv/bin/edhrec-mcp
+claude mcp add edhrec -- uv run --directory /absolute/path/to/edhrec-mcp edhrec-mcp
 ```
 
 Or add to an MCP client config:
@@ -42,7 +45,8 @@ Or add to an MCP client config:
 {
   "mcpServers": {
     "edhrec": {
-      "command": "/absolute/path/to/.venv/bin/edhrec-mcp"
+      "command": "uv",
+      "args": ["run", "--directory", "/absolute/path/to/edhrec-mcp", "edhrec-mcp"]
     }
   }
 }
@@ -58,7 +62,7 @@ public JSON endpoints politely (identifying User-Agent, throttled requests).
 ## Development
 
 ```bash
-.venv/bin/pip install -e ".[dev]"
-.venv/bin/pytest                      # unit tests (no network)
-.venv/bin/pytest -m network           # live integration tests
+uv sync --extra dev          # install runtime + dev dependencies
+uv run pytest                # unit tests (no network)
+uv run pytest -m network     # live integration tests
 ```
