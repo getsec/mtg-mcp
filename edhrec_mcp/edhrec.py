@@ -63,6 +63,19 @@ def _commander_url(slug: str, theme: str | None, budget: str | None) -> str:
     return f"{EDHREC_BASE}/commanders/{'/'.join(parts)}.json"
 
 
+def _average_deck_url(slug: str, theme: str | None, budget: str | None) -> str:
+    parts = [slug]
+    if theme:
+        parts.append(theme)
+    if budget:
+        parts.append(budget)
+    return f"{EDHREC_BASE}/average-decks/{'/'.join(parts)}.json"
+
+
+def _strip_quantity(entry: str) -> str:
+    return re.sub(r"^\d+\s+", "", entry).strip()
+
+
 def _fetch_page(fetcher: JsonFetcher, url: str, commander: str) -> dict:
     try:
         return fetcher.get_json(url, ttl=PAGE_TTL)
@@ -116,3 +129,11 @@ class EdhrecClient:
             Theme(name=t["value"], slug=t["slug"], count=t.get("count", 0))
             for t in taglinks
         ]
+
+    def get_average_decklist(
+        self, commander: str, theme: str | None = None, budget: str | None = None
+    ) -> list[str]:
+        slug = slugify(commander)
+        url = _average_deck_url(slug, theme, budget)
+        data = _fetch_page(self.fetcher, url, commander)
+        return [_strip_quantity(entry) for entry in data.get("deck", [])]
