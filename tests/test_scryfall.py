@@ -78,6 +78,17 @@ def test_get_card_not_found_raises_with_suggestion(tmp_path):
     assert "Sol Ring" in (exc.value.suggestion or "")
 
 
+def test_get_card_fuzzy_non_404_propagates(tmp_path):
+    def handler(req):
+        if "exact=" in str(req.url):
+            return httpx.Response(404, json={"details": "no exact"})
+        return httpx.Response(500, json={"details": "server error"})
+
+    sc = make_client(tmp_path, handler)
+    with pytest.raises(httpx.HTTPStatusError):
+        sc.get_card("Sol Ring")
+
+
 def test_search_returns_cards(tmp_path):
     body = {"data": [SOL_RING, SOL_RING, SOL_RING]}
     sc = make_client(tmp_path, lambda req: httpx.Response(200, json=body))

@@ -83,6 +83,8 @@ class ScryfallClient:
         try:
             return _parse_card(self.fetcher.get_json(fuzzy, ttl=CARD_TTL))
         except httpx.HTTPStatusError as err:
+            if err.response.status_code != 404:
+                raise
             detail = None
             try:
                 detail = err.response.json().get("details")
