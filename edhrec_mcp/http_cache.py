@@ -82,3 +82,16 @@ class JsonFetcher:
             except (httpx.TransportError, httpx.TimeoutException) as exc:
                 last_exc = exc
         raise last_exc  # type: ignore[misc]
+
+    def post_json(self, url: str, body: dict, *, retries: int = 1) -> dict:
+        """Uncached POST; callers cache the parts of the response they need."""
+        last_exc: Exception | None = None
+        for attempt in range(retries + 1):
+            try:
+                self._throttle()
+                resp = self.client.post(url, json=body)
+                resp.raise_for_status()
+                return resp.json()
+            except (httpx.TransportError, httpx.TimeoutException) as exc:
+                last_exc = exc
+        raise last_exc  # type: ignore[misc]

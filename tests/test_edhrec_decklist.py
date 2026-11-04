@@ -47,3 +47,14 @@ def test_average_decklist_unknown_raises(tmp_path):
     ec = make_client(tmp_path, lambda req: httpx.Response(404, json={"e": 1}))
     with pytest.raises(CommanderNotFoundError):
         ec.get_average_decklist("Notacommander Xyz")
+
+
+def test_average_decklist_current_dict_format(tmp_path):
+    page = {"deck": {
+        "commander": ["Tymna the Weaver"],
+        "commander_v2": [["Tymna the Weaver", 1]],
+        "cards": {"Artifact": [["Sol Ring", 1]], "Land": [["Plains", 8], ["Command Tower", 1]]},
+    }}
+    ec = make_client(tmp_path, lambda req: httpx.Response(200, json=page))
+    assert ec.get_average_decklist("Tymna the Weaver") == [
+        "Tymna the Weaver", "Sol Ring", "Plains", "Command Tower"]

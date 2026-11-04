@@ -99,3 +99,21 @@ def test_search_returns_cards(tmp_path):
 def test_search_no_results_returns_empty(tmp_path):
     sc = make_client(tmp_path, lambda req: httpx.Response(404, json={"details": "no cards"}))
     assert sc.search_cards("t:notreal") == []
+
+
+def test_get_cards_by_id_batches_and_caches(tmp_path):
+    calls = []
+
+    def handler(req):
+        import json
+        ids = [i["id"] for i in json.loads(req.content)["identifiers"]]
+        calls.append(len(ids))
+        return httpx.Response(200, json={"data": [{**SOL_RING, "id": i} for i in ids]})
+
+    sc = make_client(tmp_path, handler)
+    ids = [f"id-{n}" for n in range(80)]
+    out = sc.get_cards_by_id(ids + ["id-0"])
+    assert calls == [75, 5]
+    assert len(out) == 80 and out["id-3"].name == "Sol Ring"
+    sc.get_cards_by_id(ids)  # second call served from cache
+    assert calls == [75, 5]

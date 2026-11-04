@@ -22,6 +22,7 @@ class Card:
     price_usd: str | None
     image_url: str | None
     set_name: str
+    price_usd_foil: str | None = None
 
 
 class CardNotFoundError(Exception):
@@ -65,6 +66,7 @@ def _parse_card(d: dict) -> Card:
         price_usd=(d.get("prices") or {}).get("usd"),
         image_url=_image_url(d),
         set_name=d.get("set_name", ""),
+        price_usd_foil=(d.get("prices") or {}).get("usd_foil"),
     )
 
 
@@ -101,3 +103,22 @@ class ScryfallClient:
                 return []
             raise
         return [_parse_card(c) for c in data.get("data", [])[:limit]]
+
+    def get_cards_by_id(self, ids: list[str]) -> dict[str, Card]:
+        """Bulk lookup by Scryfall ID (75 per request); each card cached on disk."""
+        cache = self.fetcher.cache
+        out: dict[str, Card] = {}
+        missing = []
+        for sid in dict.fromkeys(ids):
+            hit = cache.get(f"scryfall-id:{sid}", CARD_TTL)
+            if hit is not None:
+                out[sid] = _parse_card(hit)
+            else:
+                missing.append(sid)
+        for i in range(0, len(missing), 75):
+            body = {"identifiers": [{"id": sid} for sid in missing[i:i + 75]]}
+            data = self.fetcher.post_json(f"{SCRYFALL_BASE}/cards/collection", body)
+            for d in data.get("data", []):
+                cache.set(f"scryfall-id:{d['id']}", d)
+                out[d["id"]] = _parse_card(d)
+        return out

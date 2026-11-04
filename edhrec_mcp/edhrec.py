@@ -136,4 +136,9 @@ class EdhrecClient:
         slug = slugify(commander)
         url = _average_deck_url(slug, theme, budget)
         data = _fetch_page(self.fetcher, url, commander)
-        return [_strip_quantity(entry) for entry in data.get("deck", [])]
+        deck = data.get("deck", [])
+        if isinstance(deck, dict):  # current format: {"commander": [...], "cards": {type: [[name, qty]]}}
+            return deck.get("commander", []) + [
+                name for group in deck.get("cards", {}).values() for name, _qty in group
+            ]
+        return [_strip_quantity(entry) for entry in deck]

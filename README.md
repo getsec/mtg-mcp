@@ -13,6 +13,17 @@ deckbuilding suggestions from [EDHREC](https://edhrec.com).
   recommended cards (top, high-synergy, game changers, by type) with stats.
 - `list_commander_themes(commander)` — available themes/archetypes with counts.
 - `get_average_decklist(commander, theme=None, budget=None)` — the typical ~99 cards.
+- `get_collection(colors=None, binder=None, type_contains=None, name_contains=None)` —
+  your cards, from the newest ManaBox CSV export, with color identity and USD value.
+
+## Your collection (ManaBox)
+
+In ManaBox: Collection tab > top-right menu > Export > CSV. The newest
+`ManaBox_Collection*.csv` in `~/Downloads` is used (override with
+`EDHREC_MCP_COLLECTION`, a file or folder). Re-export whenever the collection
+changes; nothing else to sync. When an export exists, recommendations get an
+`owned` flag (plus `owned_only=True` to filter) and the average decklist gains
+`owned` / `missing` lists.
 
 `theme` is a slug from `list_commander_themes` (e.g. `infect`). `budget` is
 `budget` or `expensive`.
